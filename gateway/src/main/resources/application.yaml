@@ -1,0 +1,66 @@
+server:
+  port: 10000
+
+spring:
+  application:
+    name: superCoupon-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        enabled: false
+      password: nacos
+      username: nacos
+    gateway:
+      routes:
+        - id: superCoupon-merchant-admin
+          uri: lb://superCoupon-merchant-admin/api/merchant-admin/**
+          predicates:
+            - Path=/api/merchant-admin/**
+        #          暂时先不加黑名单
+        #          filters:
+        #            - name: TokenValidate
+        #              args:
+        #                blackPathPre:
+        #                  - /api/merchant-admin/coupon-task/create
+        #                  - /api/merchant-admin/coupon-task/page
+        #                  - /api/merchant-admin/coupon-template/create
+        #                  - /api/merchant-admin/coupon-template/page
+
+        - id: superCoupon-engine
+          uri: lb://superCoupon-engine/api/engine/**
+          predicates:
+            - Path=/api/engine/**
+        #          暂时先不加黑名单
+        #          filters:
+        #            - name: TokenValidate
+        #              args:
+        #                blackPathPre:
+        #                  - /api/engine/coupon-template/redeem
+        #                  - /api/engine/coupon-template-remind/create
+        #                  - /api/engine/coupon-template-remind/list
+        #                  - /api/engine/coupon-template-remind/cancel
+
+        - id: superCoupon-settlement
+          uri: lb://superCoupon-settlement/api/settlement/**
+          predicates:
+            - Path=/api/settlement/**
+
+        - id: superCoupon-distribution
+          uri: lb://superCoupon-distribution/api/distribution/**
+          predicates:
+            - Path=/api/distribution/**
+
+        - id: superCoupon-search
+          uri: lb://superCoupon-search/api/search/**
+          predicates:
+            - Path=/api/search/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    tags:
+      application: ${spring.application.name}

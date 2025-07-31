@@ -1,0 +1,6 @@
+server:
+  port: 10050
+
+spring:
+  application:
+    name: superCoupon-search

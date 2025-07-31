@@ -5,7 +5,17 @@
     <groupId>com.hj.supercoupon</groupId>
     <artifactId>supercoupon-all</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <!--<parent>
+	<packaging>pom</packaging>
+	<modules>
+		<module>merchant-admin</module>
+		<module>distribution</module>
+		<module>engine</module>
+		<module>framework</module>
+		<module>gateway</module>
+		<module>search</module>
+		<module>settlement</module>
+	</modules>
+	<!--<parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.4</version>

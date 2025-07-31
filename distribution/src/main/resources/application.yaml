@@ -1,0 +1,6 @@
+server:
+  port: 10040
+
+spring:
+  application:
+    name: superCoupon-distribution
