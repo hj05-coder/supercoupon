@@ -4,3 +4,33 @@ server:
 spring:
   application:
     name: superCoupon-merchant-admin
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/one_coupon_rebuild?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: hj050101
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+#      password: 123456
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+springdoc:
+  default-flat-param-object: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.hj.supercoupon
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
