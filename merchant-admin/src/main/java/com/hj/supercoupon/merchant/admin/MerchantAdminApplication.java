@@ -1,6 +1,7 @@
 package com.hj.supercoupon.merchant.admin;
 
 
+import com.mzt.logapi.starter.annotation.EnableLogRecord;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Author web-cat
  */
 @SpringBootApplication
+@EnableLogRecord(tenant = "MerchantAdmin")
 @MapperScan("com.hj.supercoupon.merchant.admin.dao.mapper")
 public class MerchantAdminApplication {
     public static void main(String[] args) {
