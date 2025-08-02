@@ -1,5 +1,6 @@
 package com.hj.supercoupon.merchant.admin.controller;
 
+import com.hj.supercoupon.framework.idempotent.NoDuplicateSubmit;
 import com.hj.supercoupon.framework.result.Result;
 import com.hj.supercoupon.framework.web.Results;
 import com.hj.supercoupon.merchant.admin.dto.req.CouponTemplateSaveReqDTO;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "优惠券模版管理")
 public class CouponTemplateController {
     private final CouponTemplateService couponTemplateService;
+    @NoDuplicateSubmit
     @Operation(summary = "商家创建优惠券模版")
     @PostMapping("/api/merchant-admin/coupon-template/create")
     public Result<Void> createCouponTemplate(@RequestBody CouponTemplateSaveReqDTO couponTemplateSaveReqDTO) {

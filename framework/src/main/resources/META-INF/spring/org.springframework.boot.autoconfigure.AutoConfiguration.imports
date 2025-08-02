@@ -1,1 +1,2 @@
 com.hj.supercoupon.framework.config.WebAutoConfiguration
+com.hj.supercoupon.framework.config.IdempotentConfiguration
