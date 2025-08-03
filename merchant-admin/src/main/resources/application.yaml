@@ -33,3 +33,11 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+rocketmq:
+  name-server: 192.168.200.128:9876
+  producer:
+    group: superCoupon_merchant-admin${unique-name:}-service_common-message-execute_pg
+    send-message-timeout: 2000
+    retry-times-when-send-failed: 1
+    retry-times-when-send-async-failed: 1
