@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hj.supercoupon.merchant.admin.dao.mapper.CouponTemplateMapper">
+
+    <update id="increaseNumberCouponTemplate">
+        UPDATE t_coupon_template
+        SET stock = stock + #{number}
+        WHERE shop_number = #{shopNumber}
+          AND id = #{couponTemplateId}
+    </update>
+</mapper>
