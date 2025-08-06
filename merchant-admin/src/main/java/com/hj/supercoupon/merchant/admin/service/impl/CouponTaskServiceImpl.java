@@ -124,7 +124,7 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
                             })
                     .execute(() -> {
                         RBlockingDeque<JSONObject> blockingDeque = redissonClient.getBlockingDeque("COUPON_TASK_SEND_NUM_DELAY_QUEUE");
-                        for (; ; ) {
+                        while (true){
                             try {
                                 // 获取延迟队列已到达时间元素
                                 JSONObject delayJsonObject = blockingDeque.take();
