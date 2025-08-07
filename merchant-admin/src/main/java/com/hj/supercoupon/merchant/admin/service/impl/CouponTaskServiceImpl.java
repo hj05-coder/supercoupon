@@ -13,10 +13,13 @@ import com.hj.supercoupon.merchant.admin.dao.entity.CouponTaskDO;
 import com.hj.supercoupon.merchant.admin.dao.mapper.CouponTaskMapper;
 import com.hj.supercoupon.merchant.admin.dto.req.CouponTaskCreateReqDTO;
 import com.hj.supercoupon.merchant.admin.dto.resp.CouponTemplateQueryRespDTO;
+import com.hj.supercoupon.merchant.admin.mq.event.CouponTaskExecuteEvent;
+import com.hj.supercoupon.merchant.admin.mq.producer.CouponTaskActualExecuteProducer;
 import com.hj.supercoupon.merchant.admin.service.CouponTaskService;
 import com.hj.supercoupon.merchant.admin.service.CouponTemplateService;
 import com.hj.supercoupon.merchant.admin.service.handler.excel.RowCountListener;
 import lombok.RequiredArgsConstructor;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RedissonClient;
@@ -38,6 +41,7 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
     private final CouponTemplateService couponTemplateService;
     private final CouponTaskMapper couponTaskMapper;
     private final RedissonClient redissonClient;
+    private final CouponTaskActualExecuteProducer couponTaskActualExecuteProducer;
 
     /**
      * 为什么这里拒绝策略使用直接丢弃任务？因为在发送任务时如果遇到发送数量为空，会重新进行统计
@@ -86,6 +90,14 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
         RDelayedQueue<Object> delayedQueue = redissonClient.getDelayedQueue(blockingDeque);
         // 这里延迟时间设置 20 秒，原因是我们笃定上面线程池 20 秒之内就能结束任务
         delayedQueue.offer(delayJsonObject, 20, TimeUnit.SECONDS);
+        // 如果是立即发送任务，直接调用消息队列进行发送流程
+        if (Objects.equals(requestParam.getSendType(), CouponTaskSendTypeEnum.IMMEDIATE.getType())) {
+            // 执行优惠券推送业务，正式向用户发放优惠券
+            CouponTaskExecuteEvent couponTaskExecuteEvent = CouponTaskExecuteEvent.builder()
+                    .couponTaskId(couponTaskDO.getId())
+                    .build();
+            couponTaskActualExecuteProducer.sendMessage(couponTaskExecuteEvent);
+        }
     }
 
     private void refreshCouponTaskSendNum(JSONObject delayJsonObject) {
