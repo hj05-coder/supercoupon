@@ -41,3 +41,14 @@ rocketmq:
     send-message-timeout: 2000
     retry-times-when-send-failed: 1
     retry-times-when-send-async-failed: 1
+
+xxl-job:
+#  enabled: false
+  access-token: default_token
+  admin:
+    addresses: http://localhost:8088/xxl-job-admin
+  executor:
+    application-name: superCoupon-merchant-admin
+    ip: 127.0.0.1
+    log-retention-days: 30
+    port: 19999
