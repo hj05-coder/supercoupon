@@ -23,6 +23,8 @@ import com.hj.supercoupon.merchant.admin.dto.req.CouponTemplatePageQueryReqDTO;
 import com.hj.supercoupon.merchant.admin.dto.req.CouponTemplateSaveReqDTO;
 import com.hj.supercoupon.merchant.admin.dto.resp.CouponTemplatePageQueryRespDTO;
 import com.hj.supercoupon.merchant.admin.dto.resp.CouponTemplateQueryRespDTO;
+import com.hj.supercoupon.merchant.admin.mq.event.CouponTemplateDelayEvent;
+import com.hj.supercoupon.merchant.admin.mq.producer.CouponTemplateDelayExecuteStatusProducer;
 import com.hj.supercoupon.merchant.admin.service.CouponTemplateService;
 import com.hj.supercoupon.merchant.admin.service.basics.chain.MerchantAdminChainContext;
 import com.mzt.logapi.context.LogRecordContext;
@@ -32,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RBloomFilter;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -57,6 +60,8 @@ public class CouponTemplateServiceImpl extends ServiceImpl<CouponTemplateMapper,
     private final StringRedisTemplate stringRedisTemplate;
     private final RocketMQTemplate rocketMQTemplate;
     private final ConfigurableEnvironment configurableEnvironment;
+    private final CouponTemplateDelayExecuteStatusProducer couponTemplateDelayExecuteStatusProducer;
+    private final RBloomFilter<String> couponTemplateQueryBloomFilter;
     @LogRecord(success = """
                     创建优惠券：{{#requestParam.name}}， \
                     优惠对象：{COMMON_ENUM_PARSE{'DiscountTargetEnum' + '_' + #requestParam.target}}， \
@@ -114,34 +119,16 @@ public class CouponTemplateServiceImpl extends ServiceImpl<CouponTemplateMapper,
                 args.toArray()
         );
 
-        //使用RocketMQ发送任意时间延时消息
-        //定义Topic
-        String couponTemplateDelayCloseTopic = "super-coupon_merchant-admin-service_coupon-template-delay_topic${unique-name:}";
-        // 通过 Spring 上下文解析占位符，也就是把咱们 VM 参数里的 unique-name 替换到字符串中(由于没有配置unique-name,这里会被替换为空字符串)
-        couponTemplateDelayCloseTopic = configurableEnvironment.resolvePlaceholders(couponTemplateDelayCloseTopic);
-
-        //定义消息体
-        JSONObject messageBody = new JSONObject();
-        messageBody.put("couponTemplateId", couponTemplateDO.getId());
-        messageBody.put("shopNumber", UserContext.getShopNumber());
-
-        //设置消息送达时间, 毫秒级 Unix 时间戳
-        long deliverTimeStamp = couponTemplateDO.getValidEndTime().getTime() - System.currentTimeMillis();
-
-        //构建消息体
-        String messageKeys = UUID.randomUUID().toString();
-        Message<JSONObject> message = MessageBuilder
-                .withPayload(messageBody)
-                .setHeader(MessageConst.PROPERTY_KEYS, messageKeys)
+        // 发送延时消息事件，优惠券活动到期修改优惠券模板状态
+        CouponTemplateDelayEvent templateDelayEvent = CouponTemplateDelayEvent.builder()
+                .shopNumber(UserContext.getShopNumber())
+                .couponTemplateId(couponTemplateDO.getId())
+                .delayTime(couponTemplateDO.getValidEndTime().getTime())
                 .build();
-        // 执行 RocketMQ 消息队列发送&异常处理逻辑
-        SendResult sendResult;
-        try {
-            sendResult = rocketMQTemplate.syncSendDelayTimeMills(couponTemplateDelayCloseTopic, message, deliverTimeStamp);
-            log.info("[生产者] 优惠券模板延时关闭 - 发送结果：{}，消息ID：{}，消息Keys：{}", sendResult.getSendStatus(), sendResult.getMsgId(), messageKeys);
-        } catch (Exception e) {
-            log.error("[生产者] 优惠券模板延时关闭 - 消息发送失败，消息体：{}", couponTemplateDO.getId(), e);
-        }
+        couponTemplateDelayExecuteStatusProducer.sendMessage(templateDelayEvent);
+
+        // 添加优惠券模板 ID 到布隆过滤器
+        couponTemplateQueryBloomFilter.add(String.valueOf(couponTemplateDO.getId()));
     }
 
     @Override
