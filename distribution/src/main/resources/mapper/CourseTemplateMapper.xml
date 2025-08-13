@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hj.supercoupon.distribution.dao.mapper.CouponTemplateMapper">
+    <!--通过MYSQL 悲观行记录锁 确保库存不会被多扣,并采用上层业务自旋重试直至成功将优惠券库存扣减至零-->
+    <update id="decrementCouponTemplateStock">
+        UPDATE t_coupon_template
+        SET stock = stock - #{decrementStock}
+        WHERE shop_number = #{shopNumber}
+          AND id = #{couponTemplateId}
+          AND stock >= #{decrementStock}
+    </update>
+</mapper>

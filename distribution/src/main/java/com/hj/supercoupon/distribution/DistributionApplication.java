@@ -1,5 +1,6 @@
 package com.hj.supercoupon.distribution;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Author web-cat
  */
 @SpringBootApplication
+@MapperScan("com.hj.supercoupon.distribution.dao.mapper")
 public class DistributionApplication {
     public static void main(String[] args) {
         SpringApplication.run(DistributionApplication.class, args);

@@ -17,5 +17,5 @@ public final class EngineRedisConstant {
     /**
      * 优惠券模版缓存空值key
      */
-    public static final String COUPON_TEMPLATE_IS_NULL_KEY = "one-coupon_engine:template_is_null:%s";
+    public static final String COUPON_TEMPLATE_IS_NULL_KEY = "super-coupon_engine:template_is_null:%s";
 }
