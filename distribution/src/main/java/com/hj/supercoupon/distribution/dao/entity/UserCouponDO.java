@@ -87,4 +87,11 @@ public class UserCouponDO {
      */
     @TableField(fill = FieldFill.INSERT)
     private Integer delFlag;
+
+    /**
+     * 分发 Excel 表格中用户所在的行数
+     * 不建议大家这么写，应该再创建一个 DTO，然后进行包装转换。为了避免代码扩散，这里小小的不规范一次
+     */
+    @TableField(exist = false)
+    private Integer rowNum;
 }

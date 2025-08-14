@@ -11,4 +11,12 @@
           AND id = #{couponTemplateId}
           AND stock >= #{decrementStock}
     </update>
+
+    <!-- 回滚 MySQL 数据库优惠券库存余量，通过 MySQL 悲观行记录保障并发安全 -->
+    <update id="incrementCouponTemplateStock">
+        UPDATE t_coupon_template
+        SET stock = stock + #{incrementStock}
+        WHERE shop_number = #{shopNumber}
+          AND id = #{couponTemplateId}
+    </update>
 </mapper>
