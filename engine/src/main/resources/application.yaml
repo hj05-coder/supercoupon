@@ -12,6 +12,13 @@ spring:
       host: 127.0.0.1
       port: 6379
 #      password: 123456
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        enabled: false
+      password: nacos
+      username: nacos
 
 mybatis-plus:
   configuration:
@@ -34,3 +41,16 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: superCoupon_engine${unique-name:}-service_common-message-execute_pg
+    send-message-timeout: 2000
+    retry-times-when-send-failed: 1
+    retry-times-when-send-async-failed: 1
+
+super-coupon:
+  user-coupon-list:
+    save-cache:
+      type: direct # 有两个选项：direct 在流程里直接操作，binlog 通过解析数据库日志后操作
