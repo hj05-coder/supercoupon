@@ -27,4 +27,12 @@ public final class EngineRedisConstant {
      * 用户已领取优惠券列表模板 Key
      */
     public static final String USER_COUPON_TEMPLATE_LIST_KEY = "super-coupon_engine:user-template-list:%s";
+    /**
+     * 检查用户是否已提醒 Key
+     */
+    public static final String COUPON_REMIND_CHECK_KEY = "super-coupon_engine:coupon-remind-check:%s_%s_%d_%d";
+    /**
+     * 用户预约提醒信息 Key
+     */
+    public static final String USER_COUPON_TEMPLATE_REMIND_INFORMATION = "super-coupon_engine:coupon-remind-information:%s";
 }

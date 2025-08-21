@@ -17,8 +17,6 @@ spring:
       discovery:
         server-addr: 127.0.0.1:8848
         enabled: false
-      password: nacos
-      username: nacos
 
 mybatis-plus:
   configuration:
