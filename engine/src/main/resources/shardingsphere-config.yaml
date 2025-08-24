@@ -38,6 +38,16 @@ rules:
           standard:
             shardingColumn: user_id
             shardingAlgorithmName: user_coupon_table_mod
+      t_coupon_settlement:
+        actualDataNodes: ds_${0..1}.t_coupon_settlement_${0..15}
+        databaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: user_coupon_settlement_database_mod
+        tableStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: user_coupon_settlement_table_mod
     shardingAlgorithms: # 分片算法定义集合
       coupon_template_database_mod: # 优惠券分库算法定义
         type: CLASS_BASED # 根据自定义库分片算法类进行分片
@@ -59,6 +69,17 @@ rules:
           sharding-count: 32
           strategy: standard
       user_coupon_table_mod:
+        type: CLASS_BASED
+        props:
+          algorithmClassName: com.hj.supercoupon.engine.dao.sharding.TableHashModShardingAlgorithm
+          strategy: standard
+      user_coupon_settlement_database_mod:
+        type: CLASS_BASED
+        props:
+          algorithmClassName: com.hj.supercoupon.engine.dao.sharding.DBHashModShardingAlgorithm
+          sharding-count: 16
+          strategy: standard
+      user_coupon_settlement_table_mod:
         type: CLASS_BASED
         props:
           algorithmClassName: com.hj.supercoupon.engine.dao.sharding.TableHashModShardingAlgorithm

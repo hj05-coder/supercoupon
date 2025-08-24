@@ -1,4 +1,7 @@
 package com.hj.supercoupon.engine.service;
+import com.hj.supercoupon.engine.dto.req.CouponCreatePaymentReqDTO;
+import com.hj.supercoupon.engine.dto.req.CouponProcessPaymentReqDTO;
+import com.hj.supercoupon.engine.dto.req.CouponProcessRefundReqDTO;
 import com.hj.supercoupon.engine.dto.req.CouponTemplateRedeemReqDTO;
 
 /**
@@ -20,4 +23,25 @@ public interface UserCouponService {
      * @param requestParam 请求参数
      */
     void redeemUserCouponByMQ(CouponTemplateRedeemReqDTO requestParam);
+
+    /**
+     * 创建优惠券结算单记录
+     *
+     * @param requestParam 创建优惠券结算单请求参数
+     */
+    void createPaymentRecord(CouponCreatePaymentReqDTO requestParam);
+
+    /**
+     * 处理订单支付操作，修改结算单为已支付
+     *
+     * @param requestParam 处理优惠券结算单请求参数
+     */
+    void processPayment(CouponProcessPaymentReqDTO requestParam);
+
+    /**
+     * 处理订单退款操作，修改结算单为已退款并回滚优惠券
+     *
+     * @param requestParam 处理优惠券结算单退款请求参数
+     */
+    void processRefund(CouponProcessRefundReqDTO requestParam);
 }
