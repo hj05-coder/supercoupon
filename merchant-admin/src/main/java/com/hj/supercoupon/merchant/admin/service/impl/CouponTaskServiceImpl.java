@@ -58,15 +58,12 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void createCouponTask(CouponTaskCreateReqDTO requestParam) {
-        // 验证非空参数
-        // 验证参数是否正确, 比如文件地址是否为我们所期望的格式
-        // 验证参数依赖关系, 比如选择定时发送,发送时间是否不为空等
         CouponTemplateQueryRespDTO template = couponTemplateService.findCouponTemplateById(requestParam.getCouponTemplateId());
         if (template == null) {
             throw new ClientException("优惠券模版不存在,请检查提交信息是否正确");
         }
-        // ......
-
+        //参数验证
+        validateRequestParam(requestParam);
         // 构建优惠券推送任务数据库持久层实体
         CouponTaskDO couponTaskDO = BeanUtil.copyProperties(requestParam, CouponTaskDO.class);
         couponTaskDO.setBatchId(IdUtil.getSnowflakeNextId());
@@ -160,5 +157,30 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
                         }
                     });
         }
+    }
+
+    private void validateRequestParam(CouponTaskCreateReqDTO requestParam) {
+        // 基本非空验证
+        if (requestParam.getTaskName() == null || requestParam.getFileAddress() == null
+                || requestParam.getNotifyType() == null
+                || requestParam.getCouponTemplateId() == null
+                || requestParam.getSendType() == null) {
+            throw new ClientException("优惠券任务参数不能为空");
+        }
+
+        // 文件地址格式验证
+        if (!isValidExcelFile(requestParam.getFileAddress())) {
+            throw new ClientException("文件地址格式不正确，仅支持Excel文件");
+        }
+
+        // 发送类型依赖验证
+        if (Objects.equals(requestParam.getSendType(), CouponTaskSendTypeEnum.SCHEDULED.getType())
+                && requestParam.getSendTime() == null) {
+            throw new ClientException("定时发送类型必须设置发送时间");
+        }
+    }
+
+    private boolean isValidExcelFile(String fileAddress) {
+        return fileAddress != null && (fileAddress.endsWith(".xlsx") || fileAddress.endsWith(".xls"));
     }
 }
