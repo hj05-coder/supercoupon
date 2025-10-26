@@ -32,7 +32,7 @@ public class UserCouponRedeemProducer extends AbstractCommonSendProduceTemplate<
         return BaseSendExtendDTO.builder()
                 .eventName("用户兑换优惠券")
                 .keys(UUID.randomUUID().toString())
-                .topic(environment.resolvePlaceholders("one-coupon_engine-service_coupon-redeem_topic${unique-name:}"))
+                .topic(environment.resolvePlaceholders("super-coupon_engine-service_coupon-redeem_topic${unique-name:}"))
                 .sentTimeout(2000L)
                 .build();
     }

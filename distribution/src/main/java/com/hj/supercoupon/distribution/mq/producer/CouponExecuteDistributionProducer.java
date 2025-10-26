@@ -34,7 +34,7 @@ public class CouponExecuteDistributionProducer extends AbstractCommonSendProduce
         return BaseSendExtendDTO.builder()
                 .eventName("优惠券发放执行")
                 .keys(String.valueOf(messageSendEvent.getCouponTaskId()))
-                .topic(environment.resolvePlaceholders("one-coupon_distribution-service_coupon-execute-distribution_topic${unique-name:}"))
+                .topic(environment.resolvePlaceholders("super-coupon_distribution-service_coupon-execute-distribution_topic${unique-name:}"))
                 .sentTimeout(2000L)
                 .build();
     }
