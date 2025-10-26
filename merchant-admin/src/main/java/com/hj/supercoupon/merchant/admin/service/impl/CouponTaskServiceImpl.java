@@ -18,6 +18,7 @@ import com.hj.supercoupon.merchant.admin.mq.producer.CouponTaskActualExecuteProd
 import com.hj.supercoupon.merchant.admin.service.CouponTaskService;
 import com.hj.supercoupon.merchant.admin.service.CouponTemplateService;
 import com.hj.supercoupon.merchant.admin.service.handler.excel.RowCountListener;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.redisson.api.RBlockingDeque;
@@ -47,8 +48,8 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
      * 为什么这里拒绝策略使用直接丢弃任务？因为在发送任务时如果遇到发送数量为空，会重新进行统计
      */
     private final ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors(),
-            Runtime.getRuntime().availableProcessors() << 1,
+            Runtime.getRuntime().availableProcessors(), //获取当前JVM可用处理器核心数(CPU核数)
+            Runtime.getRuntime().availableProcessors() << 1, //数值左移1位,相当于乘2
             60,
             TimeUnit.SECONDS,
             new SynchronousQueue<>(),
@@ -115,18 +116,25 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
     }
 
     /**
+     * 因为静态内部类的 Bean 注入有问题，所以我们这里直接 new 对象运行即可
+     * 如果按照上一版本的方式写，refreshCouponTaskSendNum 方法中 couponTaskMapper 为空
+     */
+    @PostConstruct
+    public void init() {
+        new RefreshCouponTaskDelayQueueRunner(this, couponTaskMapper, redissonClient).run();
+    }
+
+    /**
      * 优惠券延迟刷新发送条数兜底消费者｜这是兜底策略，一般来说不会执行这段逻辑
      * 如果延迟消息没有持久化成功，或者 Redis 挂了怎么办？后续可以人工处理
      */
-    @Service
     @RequiredArgsConstructor
-    class RefreshCouponTaskDelayQueueRunner implements CommandLineRunner {
-
+    static class RefreshCouponTaskDelayQueueRunner{
+        private final CouponTaskServiceImpl couponTaskService;
         private final CouponTaskMapper couponTaskMapper;
         private final RedissonClient redissonClient;
 
-        @Override
-        public void run(String... args) throws Exception {
+        public void run(){
             Executors.newSingleThreadExecutor(
                             runnable -> {
                                 Thread thread = new Thread(runnable);
@@ -136,7 +144,7 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
                             })
                     .execute(() -> {
                         RBlockingDeque<JSONObject> blockingDeque = redissonClient.getBlockingDeque("COUPON_TASK_SEND_NUM_DELAY_QUEUE");
-                        while (true){
+                        for (;;){
                             try {
                                 // 获取延迟队列已到达时间元素
                                 JSONObject delayJsonObject = blockingDeque.take();
@@ -144,7 +152,7 @@ public class CouponTaskServiceImpl extends ServiceImpl<CouponTaskMapper, CouponT
                                     // 获取优惠券推送记录，查看发送条数是否已经有值，有的话代表上面线程池已经处理完成，无需再处理
                                     CouponTaskDO couponTaskDO = couponTaskMapper.selectById(delayJsonObject.getLong("couponTaskId"));
                                     if (couponTaskDO.getSendNum() == null) {
-                                        refreshCouponTaskSendNum(delayJsonObject);
+                                        couponTaskService.refreshCouponTaskSendNum(delayJsonObject);
                                     }
                                 }
                             } catch (Throwable ignored) {
