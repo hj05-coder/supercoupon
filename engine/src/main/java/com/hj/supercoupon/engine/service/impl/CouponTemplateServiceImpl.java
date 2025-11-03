@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -70,8 +71,9 @@ public class CouponTemplateServiceImpl extends ServiceImpl<CouponTemplateMapper,
                             .eq(CouponTemplateDO::getStatus, CouponTemplateStatusEnum.ACTIVE.getStatus());
                     CouponTemplateDO couponTemplateDO = couponTemplateMapper.selectOne(queryWrapper);
 
-                    //优惠券模版不存在或者已过期直接抛出异常
+                    //优惠券模版不存在或者已过期加入空值缓存直接抛出异常
                     if (couponTemplateDO == null) {
+                        stringRedisTemplate.opsForValue().set(couponTemplateIsNullCacheKey, "", 30, TimeUnit.MINUTES);
                         throw new ClientException("优惠券模板不存在或已过期");
                     }
                     // 通过将数据库的记录序列化成 JSON 字符串放入 Redis 缓存
