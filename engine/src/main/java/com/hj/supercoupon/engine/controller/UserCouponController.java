@@ -2,6 +2,7 @@ package com.hj.supercoupon.engine.controller;
 
 import com.hj.supercoupon.engine.dto.req.CouponCreatePaymentReqDTO;
 import com.hj.supercoupon.engine.dto.req.CouponProcessPaymentReqDTO;
+import com.hj.supercoupon.engine.dto.req.CouponProcessRefundReqDTO;
 import com.hj.supercoupon.engine.dto.req.CouponTemplateRedeemReqDTO;
 import com.hj.supercoupon.engine.service.UserCouponService;
 import com.hj.supercoupon.framework.result.Result;
@@ -47,6 +48,13 @@ public class UserCouponController {
     @PostMapping("/api/engine/user-coupon/process-payment")
     public Result<Void> processPayment(@RequestBody CouponProcessPaymentReqDTO requestParam) {
         userCouponService.processPayment(requestParam);
+        return Results.success();
+    }
+
+    @Operation(summary = "退款优惠券结算单", description = "用户退款时处理使用的优惠券, 常过来说应该监听退款后的消息队列事件")
+    @PostMapping("/api/engine/user-coupon/process-refund")
+    public Result<Void> processRefund(@RequestBody CouponProcessRefundReqDTO requestParam){
+        userCouponService.processRefund(requestParam);
         return Results.success();
     }
 }
