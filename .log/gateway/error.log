@@ -1,0 +1,14 @@
+2025-10-24 20:18:04.414 ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter  :40   [32m                  [0;39m 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 10000 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 10000 or configure this application to listen on another port.
+

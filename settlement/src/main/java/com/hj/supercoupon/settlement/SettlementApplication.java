@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Author web-cat
  */
 @SpringBootApplication
-public class SettlementApplication {
+public class    SettlementApplication {
     public static void main(String[] args) {
         SpringApplication.run(SettlementApplication.class, args);
     }
