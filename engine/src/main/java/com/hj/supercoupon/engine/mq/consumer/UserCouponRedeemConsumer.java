@@ -50,7 +50,7 @@ public class UserCouponRedeemConsumer implements RocketMQListener<MessageWrapper
             keyPrefix = "user-coupon-redeem:",
             key = "#messageWrapper.keys",
             keyTimeout = 600
-    )
+    )      //进行压测，需要将这个幂等注释掉
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onMessage(MessageWrapper<UserCouponRedeemEvent> messageWrapper) {
